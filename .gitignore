@@ -1,0 +1,20 @@
+# Node
+node_modules
+npm-debug.log*
+package-lock.json.#*
+
+# Cypress artifacts
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# Cypress binary cache (local)
+.cypress-cache/
+.cache/
+.config/Cypress/
+~/.cache/Cypress
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

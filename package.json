@@ -1,0 +1,19 @@
+{
+  "name": "projeto-cypress",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "cypress:open": "cypress open --browser chrome",
+    "cypress:open:electron": "cypress open",
+    "test": "cypress run --browser chrome --headless",
+    "test:headed": "cypress run --browser chrome",
+    "test:e2e": "cypress run --browser chrome --headless --spec cypress/e2e/registration.demoqa.cy.js",
+    "test:api": "cypress run --browser chrome --headless --spec cypress/e2e/api.jsonplaceholder.cy.js"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.0.0",
+    "cypress": "^13.0.0",
+    "cypress-file-upload": "^5.0.8"
+  }
+}

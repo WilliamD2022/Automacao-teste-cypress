@@ -1,0 +1,37 @@
+version: 0.2
+#Roda testes Cypress no AWS CodeBuild
+phases:
+  install:
+    commands:
+      - echo "[INSTALL] Configurando Node e dependências..."
+      - node -v || true
+      - npm -v || true
+      - npm ci
+      # Garante download do binário do Cypress
+      - npx cypress install
+
+  pre_build:
+    commands:
+      - echo "[PRE_BUILD] Verificando estrutura..."
+      - ls -la
+      - ls -la cypress || true
+      - cat cypress.config.js
+
+  build:
+    commands:
+      - echo "[BUILD] Executando testes Cypress (Electron headless)..."
+      # Electron headless (padrão) — estável no CodeBuild
+      - npx cypress run --headless
+      # Se quiser Chrome e ele estiver instalado na imagem:
+      # - npx cypress run --browser chrome --headless
+
+  post_build:
+    commands:
+      - echo "[POST_BUILD] Finalizado em $(date '+%Y-%m-%d %H:%M:%S')"
+
+artifacts:
+  files:
+    - cypress/videos/**/*
+    - cypress/screenshots/**/*
+    - cypress/results/**/*   # caso adicione relatórios futuramente
+  discard-paths: no

@@ -1,0 +1,53 @@
+name: CI - Cypress
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  e2e-and-api:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      # Roda TODOS os testes (E2E + API) em Chrome headless
+      - name: Run Cypress
+        uses: cypress-io/github-action@v6
+        with:
+          browser: chrome
+          headless: true
+          command: npm test
+        env:
+          # Evita travar por erros de 3rd-party na UI (você já trata no support/e2e.js, mas fica aqui como reforço)
+          CYPRESS_retries: '2'
+
+      # Publica vídeos (sempre) e screenshots (só se falhar)
+      - name: Upload videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: cypress/videos/**/*
+          if-no-files-found: ignore
+
+      - name: Upload screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/**/*
+          if-no-files-found: ignore
