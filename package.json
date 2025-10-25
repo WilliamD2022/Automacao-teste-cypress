@@ -10,6 +10,7 @@
     "test:headed": "cypress run --browser chrome",
     "test:e2e": "cypress run --browser chrome --headless --spec cypress/e2e/registration.demoqa.cy.js",
     "test:api": "cypress run --browser chrome --headless --spec cypress/e2e/api.jsonplaceholder.cy.js"
+    
   },
   "devDependencies": {
     "@faker-js/faker": "^9.0.0",

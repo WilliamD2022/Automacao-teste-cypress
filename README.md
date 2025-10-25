@@ -1,4 +1,6 @@
 # 🧪 Automação de Testes com Cypress
+[![CI - Cypress](https://github.com/WilliamD2022/Automacao-teste-cypress/actions/workflows/cypress.yml/badge.svg)](https://github.com/WilliamD2022/Automacao-teste-cypress/actions/workflows/cypress.yml)
+
 
 Projeto de automação criado com **Cypress**, voltado para testes de interface (E2E) e **testes de API REST**.  
 O projeto utiliza sites e serviços públicos para fins educacionais, com foco em **boas práticas, organização e qualidade de código**.
