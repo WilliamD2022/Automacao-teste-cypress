@@ -13,51 +13,76 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-      - uses: actions/cache@v4
+        with:
+          node-version: "20"
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
         with:
           path: |
             ~/.npm
             node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
-      - run: npm ci
-      - name: Run Cypress (API specs only)
-        run: npx cypress run --headless --spec "cypress/e2e/api.*.cy.js"
+
+      - name: Install deps
+        run: npm ci
+
+      # ✅ Rode apenas o JSONPlaceholder (passa sem API key)
+      - name: Run Cypress (API - JSONPlaceholder only)
+        run: npx cypress run --headless --spec "cypress/e2e/api.jsonplaceholder.cy.js"
+
       - name: Upload videos
         if: always()
         uses: actions/upload-artifact@v4
-        with: { name: cypress-videos-api, path: cypress/videos }
+        with:
+          name: cypress-videos-api
+          path: cypress/videos
+
       - name: Upload screenshots (se falhar)
         if: failure()
         uses: actions/upload-artifact@v4
-        with: { name: cypress-screenshots-api, path: cypress/screenshots }
+        with:
+          name: cypress-screenshots-api
+          path: cypress/screenshots
 
   e2e:
     runs-on: ubuntu-latest
     name: E2E (non-blocking)
     needs: api
-    continue-on-error: true     # <<< não quebra o pipeline se falhar
+    continue-on-error: true   # não quebra o pipeline se falhar
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: { node-version: "20" }
-      - uses: actions/cache@v4
+        with:
+          node-version: "20"
+
+      - name: Cache node_modules
+        uses: actions/cache@v4
         with:
           path: |
             ~/.npm
             node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: ${{ runner.os }}-node-
-      - run: npm ci
-      # Dicas para reduzir flakiness do DemoQA:
+
+      - name: Install deps
+        run: npm ci
+
+      # ⚠️ Dicas anti-flakiness já no spec (scroll/force/uncaught-exception)
       - name: Run Cypress (E2E DemoQA)
         run: npx cypress run --headless --browser chrome --spec "cypress/e2e/registration.demoqa.cy.js"
+
       - name: Upload videos
         if: always()
         uses: actions/upload-artifact@v4
-        with: { name: cypress-videos-e2e, path: cypress/videos }
+        with:
+          name: cypress-videos-e2e
+          path: cypress/videos
+
       - name: Upload screenshots (se falhar)
         if: failure()
         uses: actions/upload-artifact@v4
-        with: { name: cypress-screenshots-e2e, path: cypress/screenshots }
+        with:
+          name: cypress-screenshots-e2e
+          path: cypress/screenshots
