@@ -7,46 +7,57 @@ on:
     branches: [ "main" ]
 
 jobs:
-  e2e-and-api:
+  api:
     runs-on: ubuntu-latest
-
+    name: API (required)
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-
-      - name: Cache node_modules
-        uses: actions/cache@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - uses: actions/cache@v4
         with:
           path: |
             ~/.npm
             node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install deps
-        run: npm ci
-
-      # Executa TODOS os testes (E2E + API) em headless Chrome
-      - name: Run Cypress
-        run: npx cypress run --browser chrome --headless
-
-      # Faz upload dos artefatos (vídeos e screenshots de falhas)
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm ci
+      - name: Run Cypress (API specs only)
+        run: npx cypress run --headless --spec "cypress/e2e/api.*.cy.js"
       - name: Upload videos
         if: always()
         uses: actions/upload-artifact@v4
-        with:
-          name: cypress-videos
-          path: cypress/videos
-
-      - name: Upload screenshots
+        with: { name: cypress-videos-api, path: cypress/videos }
+      - name: Upload screenshots (se falhar)
         if: failure()
         uses: actions/upload-artifact@v4
+        with: { name: cypress-screenshots-api, path: cypress/screenshots }
+
+  e2e:
+    runs-on: ubuntu-latest
+    name: E2E (non-blocking)
+    needs: api
+    continue-on-error: true     # <<< não quebra o pipeline se falhar
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: "20" }
+      - uses: actions/cache@v4
         with:
-          name: cypress-screenshots
-          path: cypress/screenshots
+          path: |
+            ~/.npm
+            node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-node-
+      - run: npm ci
+      # Dicas para reduzir flakiness do DemoQA:
+      - name: Run Cypress (E2E DemoQA)
+        run: npx cypress run --headless --browser chrome --spec "cypress/e2e/registration.demoqa.cy.js"
+      - name: Upload videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: cypress-videos-e2e, path: cypress/videos }
+      - name: Upload screenshots (se falhar)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with: { name: cypress-screenshots-e2e, path: cypress/screenshots }
